@@ -1,20 +1,11 @@
-module org.tp1_jdbc {
+module org {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.sql;
+    requires java.desktop; // Pour Scanner
 
 
-    opens org.tp1_jdbc to javafx.fxml;
-    exports org.tp1_jdbc;
-    exports;
-    opens to
-    exports;
-    opens to
-    exports;
-    opens to
-    exports;
-    opens to
-    exports;
-    opens to
-    exports;
-    opens to
+
+    opens org to javafx.fxml;
+    exports org;
 }
