@@ -1,14 +1,13 @@
 package model;
 
 public class Pilote {
-    private static int compteur = 0;
     private int id_pilote;
     private String nom;
     private String prenom;
     private int experience;
 
-    public Pilote(String nom, String prenom, int experience) {
-        this.id_pilote = compteur++;
+    public Pilote(int id_pilote,String nom, String prenom, int experience) {
+        this.id_pilote = id_pilote;
         this.nom = nom;
         this.prenom = prenom;
         this.experience = experience;
@@ -22,8 +21,16 @@ public class Pilote {
         return nom;
     }
 
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
     public String getPrenom() {
         return prenom;
+    }
+
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
     }
 
 

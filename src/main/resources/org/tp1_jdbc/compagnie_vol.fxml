@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.6" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.VolController">
+    <children>
+        <!-- Header -->
+        <HBox alignment="CENTER" prefHeight="80.0" style="-fx-background-color: #2c3e50;">
+            <children>
+                <Label text="Système de Gestion de Compagnie Aérienne" textFill="WHITE">
+                    <font>
+                        <Font name="Arial Bold" size="24.0" />
+                    </font>
+                </Label>
+            </children>
+        </HBox>
+
+        <!-- Main Content with Tabs -->
+        <TabPane prefHeight="700.0" prefWidth="1200.0" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <!-- Tab Vols -->
+                <Tab text="Gestion des Vols">
+                    <content>
+                        <VBox spacing="10.0">
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </padding>
+
+                            <!-- Form de création de vol -->
+                            <TitledPane expanded="false" text="Créer un nouveau vol">
+                                <content>
+                                    <GridPane hgap="10.0" vgap="10.0">
+                                        <columnConstraints>
+                                            <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
+                                            <ColumnConstraints hgrow="SOMETIMES" />
+                                            <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
+                                            <ColumnConstraints hgrow="SOMETIMES" />
+                                        </columnConstraints>
+                                        <rowConstraints>
+                                            <RowConstraints />
+                                            <RowConstraints />
+                                            <RowConstraints />
+                                            <RowConstraints />
+                                        </rowConstraints>
+
+                                        <Label text="Numéro de vol:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                        <TextField fx:id="numeroVolField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                        <Label text="Pilote:" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                        <ComboBox fx:id="piloteComboBox" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+
+                                        <Label text="Avion:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                        <ComboBox fx:id="avionComboBox" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                        <Label text="Statut:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                        <ComboBox fx:id="statutComboBox" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+
+                                        <Label text="Ville de départ:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                        <TextField fx:id="villeDepartField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                                        <Label text="Ville d'arrivée:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                        <TextField fx:id="villeArriveeField" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+
+                                        <Label text="Date départ:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                        <DatePicker fx:id="dateDepartPicker" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                                        <Label text="Date arrivée:" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                        <DatePicker fx:id="dateArriveePicker" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                                    </GridPane>
+                                </content>
+                            </TitledPane>
+
+                            <!-- Boutons d'action -->
+                            <HBox spacing="10.0">
+                                <children>
+                                    <Button fx:id="creerVolBtn" onAction="#creerVol" prefWidth="120.0" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="Créer Vol" />
+                                    <Button fx:id="modifierVolBtn" onAction="#modifierVol" prefWidth="120.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="Modifier Vol" />
+                                    <Button fx:id="supprimerVolBtn" onAction="#supprimerVol" prefWidth="120.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="Supprimer Vol" />
+                                    <Button fx:id="rafraichirVolsBtn" onAction="#rafraichirVols" prefWidth="120.0" style="-fx-background-color: #95a5a6; -fx-text-fill: white;" text="Rafraîchir" />
+                                </children>
+                            </HBox>
+
+                            <!-- Table des vols -->
+                            <TableView fx:id="volsTableView" prefHeight="400.0">
+                                <columns>
+                                    <TableColumn fx:id="volIdColumn" prefWidth="60.0" text="ID" />
+                                    <TableColumn fx:id="numeroVolColumn" prefWidth="120.0" text="Numéro" />
+                                    <TableColumn fx:id="piloteColumn" prefWidth="150.0" text="Pilote" />
+                                    <TableColumn fx:id="avionColumn" prefWidth="120.0" text="Avion" />
+                                    <TableColumn fx:id="villeDepartColumn" prefWidth="120.0" text="Départ" />
+                                    <TableColumn fx:id="villeArriveeColumn" prefWidth="120.0" text="Arrivée" />
+                                    <TableColumn fx:id="dateDepartColumn" prefWidth="150.0" text="Date Départ" />
+                                    <TableColumn fx:id="dateArriveeColumn" prefWidth="150.0" text="Date Arrivée" />
+                                    <TableColumn fx:id="statutColumn" prefWidth="100.0" text="Statut" />
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <!-- Tab Pilotes -->
+                <Tab text="Gestion des Pilotes">
+                    <content>
+                        <VBox spacing="10.0">
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </padding>
+
+                            <!-- Form pilote -->
+                            <TitledPane expanded="false" text="Ajouter/Modifier un pilote">
+                                <content>
+                                    <GridPane hgap="10.0" vgap="10.0">
+                                        <columnConstraints>
+                                            <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
+                                            <ColumnConstraints hgrow="SOMETIMES" />
+                                            <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
+                                            <ColumnConstraints hgrow="SOMETIMES" />
+                                        </columnConstraints>
+
+                                        <Label text="Nom:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                        <TextField fx:id="piloteNomField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                        <Label text="Prénom:" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                        <TextField fx:id="pilotePrenomField" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+
+                                        <Label text="Expérience (années):" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                        <TextField fx:id="piloteExperienceField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    </GridPane>
+                                </content>
+                            </TitledPane>
+
+                            <!-- Boutons pilote -->
+                            <HBox spacing="10.0">
+                                <children>
+                                    <Button fx:id="ajouterPiloteBtn" onAction="#ajouterPilote" prefWidth="120.0" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="Ajouter Pilote" />
+                                    <Button fx:id="modifierPiloteBtn" onAction="#modifierPilote" prefWidth="120.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="Modifier Pilote" />
+                                    <Button fx:id="supprimerPiloteBtn" onAction="#supprimerPilote" prefWidth="120.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="Supprimer Pilote" />
+                                    <Button fx:id="rafraichirPilotesBtn" onAction="#rafraichirPilotes" prefWidth="120.0" style="-fx-background-color: #95a5a6; -fx-text-fill: white;" text="Rafraîchir" />
+                                </children>
+                            </HBox>
+
+                            <!-- Table pilotes -->
+                            <TableView fx:id="pilotesTableView" prefHeight="400.0">
+                                <columns>
+                                    <TableColumn fx:id="piloteIdColumn" prefWidth="60.0" text="ID" />
+                                    <TableColumn fx:id="piloteNomColumn" prefWidth="150.0" text="Nom" />
+                                    <TableColumn fx:id="pilotePrenomColumn" prefWidth="150.0" text="Prénom" />
+                                    <TableColumn fx:id="piloteExperienceColumn" prefWidth="120.0" text="Expérience (ans)" />
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <!-- Tab Avions -->
+                <Tab text="Gestion des Avions">
+                    <content>
+                        <VBox spacing="10.0">
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </padding>
+
+                            <!-- Form avion -->
+                            <TitledPane expanded="false" text="Ajouter/Modifier un avion">
+                                <content>
+                                    <GridPane hgap="10.0" vgap="10.0">
+                                        <columnConstraints>
+                                            <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
+                                            <ColumnConstraints hgrow="SOMETIMES" />
+                                            <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
+                                            <ColumnConstraints hgrow="SOMETIMES" />
+                                        </columnConstraints>
+
+                                        <Label text="Modèle:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                        <TextField fx:id="avionModeleField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                        <Label text="Capacité:" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                        <TextField fx:id="avionCapaciteField" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                                    </GridPane>
+                                </content>
+                            </TitledPane>
+
+                            <!-- Boutons avion -->
+                            <HBox spacing="10.0">
+                                <children>
+                                    <Button fx:id="ajouterAvionBtn" onAction="#ajouterAvion" prefWidth="120.0" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="Ajouter Avion" />
+                                    <Button fx:id="modifierAvionBtn" onAction="#modifierAvion" prefWidth="120.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="Modifier Avion" />
+                                    <Button fx:id="supprimerAvionBtn" onAction="#supprimerAvion" prefWidth="120.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="Supprimer Avion" />
+                                    <Button fx:id="rafraichirAvionsBtn" onAction="#rafraichirAvions" prefWidth="120.0" style="-fx-background-color: #95a5a6; -fx-text-fill: white;" text="Rafraîchir" />
+                                </children>
+                            </HBox>
+
+                            <!-- Table avions -->
+                            <TableView fx:id="avionsTableView" prefHeight="400.0">
+                                <columns>
+                                    <TableColumn fx:id="avionIdColumn" prefWidth="60.0" text="ID" />
+                                    <TableColumn fx:id="avionModeleColumn" prefWidth="200.0" text="Modèle" />
+                                    <TableColumn fx:id="avionCapaciteColumn" prefWidth="120.0" text="Capacité" />
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <!-- Tab Passagers -->
+                <Tab text="Gestion des Passagers">
+                    <content>
+                        <VBox spacing="10.0">
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </padding>
+
+                            <!-- Form passager -->
+                            <TitledPane expanded="false" text="Ajouter/Modifier un passager">
+                                <content>
+                                    <GridPane hgap="10.0" vgap="10.0">
+                                        <columnConstraints>
+                                            <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
+                                            <ColumnConstraints hgrow="SOMETIMES" />
+                                            <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
+                                            <ColumnConstraints hgrow="SOMETIMES" />
+                                        </columnConstraints>
+
+                                        <Label text="Nom:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                        <TextField fx:id="passagerNomField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                        <Label text="Prénom:" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                        <TextField fx:id="passagerPrenomField" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+
+                                        <Label text="Nationalité:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                        <TextField fx:id="passagerNationaliteField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    </GridPane>
+                                </content>
+                            </TitledPane>
+
+                            <!-- Boutons passager -->
+                            <HBox spacing="10.0">
+                                <children>
+                                    <Button fx:id="ajouterPassagerBtn" onAction="#ajouterPassager" prefWidth="120.0" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="Ajouter Passager" />
+                                    <Button fx:id="modifierPassagerBtn" onAction="#modifierPassager" prefWidth="120.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="Modifier Passager" />
+                                    <Button fx:id="supprimerPassagerBtn" onAction="#supprimerPassager" prefWidth="120.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="Supprimer Passager" />
+                                    <Button fx:id="rafraichirPassagersBtn" onAction="#rafraichirPassagers" prefWidth="120.0" style="-fx-background-color: #95a5a6; -fx-text-fill: white;" text="Rafraîchir" />
+                                </children>
+                            </HBox>
+
+                            <!-- Table passagers -->
+                            <TableView fx:id="passagersTableView" prefHeight="400.0">
+                                <columns>
+                                    <TableColumn fx:id="passagerIdColumn" prefWidth="60.0" text="ID" />
+                                    <TableColumn fx:id="passagerNomColumn" prefWidth="150.0" text="Nom" />
+                                    <TableColumn fx:id="passagerPrenomColumn" prefWidth="150.0" text="Prénom" />
+                                    <TableColumn fx:id="passagerNationaliteColumn" prefWidth="150.0" text="Nationalité" />
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <!-- Tab Réservations -->
+                <Tab text="Gestion des Réservations">
+                    <content>
+                        <VBox spacing="10.0">
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </padding>
+
+                            <!-- Form réservation -->
+                            <TitledPane expanded="false" text="Créer une réservation">
+                                <content>
+                                    <GridPane hgap="10.0" vgap="10.0">
+                                        <columnConstraints>
+                                            <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
+                                            <ColumnConstraints hgrow="SOMETIMES" />
+                                            <ColumnConstraints hgrow="NEVER" minWidth="120.0" />
+                                            <ColumnConstraints hgrow="SOMETIMES" />
+                                        </columnConstraints>
+
+                                        <Label text="Passager:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                        <ComboBox fx:id="reservationPassagerComboBox" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                        <Label text="Vol:" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                        <ComboBox fx:id="reservationVolComboBox" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+
+                                        <Label text="Date réservation:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                        <DatePicker fx:id="dateReservationPicker" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    </GridPane>
+                                </content>
+                            </TitledPane>
+
+                            <!-- Boutons réservation -->
+                            <HBox spacing="10.0">
+                                <children>
+                                    <Button fx:id="creerReservationBtn" onAction="#creerReservation" prefWidth="120.0" style="-fx-background-color: #27ae60; -fx-text-fill: white;" text="Créer Réservation" />
+                                    <Button fx:id="supprimerReservationBtn" onAction="#supprimerReservation" prefWidth="120.0" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text="Supprimer Réservation" />
+                                    <Button fx:id="rafraichirReservationsBtn" onAction="#rafraichirReservations" prefWidth="120.0" style="-fx-background-color: #95a5a6; -fx-text-fill: white;" text="Rafraîchir" />
+                                </children>
+                            </HBox>
+
+                            <!-- Table réservations -->
+                            <TableView fx:id="reservationsTableView" prefHeight="400.0">
+                                <columns>
+                                    <TableColumn fx:id="reservationIdColumn" prefWidth="60.0" text="ID" />
+                                    <TableColumn fx:id="reservationPassagerColumn" prefWidth="200.0" text="Passager" />
+                                    <TableColumn fx:id="reservationVolColumn" prefWidth="150.0" text="Vol" />
+                                    <TableColumn fx:id="reservationDateColumn" prefWidth="150.0" text="Date Réservation" />
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+
+        <!-- Status Bar -->
+        <HBox alignment="CENTER_LEFT" prefHeight="30.0" style="-fx-background-color: #ecf0f1;">
+            <children>
+                <Label fx:id="statusLabel" text="Prêt">
+                    <HBox.margin>
+                        <Insets left="10.0" />
+                    </HBox.margin>
+                </Label>
+            </children>
+        </HBox>
+    </children>
+</VBox>

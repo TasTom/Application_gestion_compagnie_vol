@@ -17,6 +17,10 @@ public class Avion {
         return modele;
     }
 
+    public void setModele(String modele) {
+        this.modele = modele;
+    }
+
     public int getId_avion() {
         return id_avion;
     }
