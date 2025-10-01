@@ -364,6 +364,7 @@ public class VolController implements Initializable {
             String nom = piloteNomField.getText();
             String prenom = pilotePrenomField.getText();
             String experienceText = piloteExperienceField.getText();
+            int id_pilote = Integer.parseInt(piloteIdColumn.getText());
 
             if (nom.isEmpty() || prenom.isEmpty() || experienceText.isEmpty()) {
                 updateStatus("Veuillez remplir tous les champs du pilote");
@@ -371,7 +372,7 @@ public class VolController implements Initializable {
             }
 
             int experience = Integer.parseInt(experienceText);
-            Pilote nouveauPilote = new Pilote(nom, prenom, experience);
+            Pilote nouveauPilote = new Pilote(id_pilote,nom, prenom, experience);
 
             piloteDAO.create(nouveauPilote);
             rafraichirPilotes();
