@@ -314,6 +314,74 @@
                         </VBox>
                     </content>
                 </Tab>
+                <!-- Tab Consultations -->
+                <Tab text="Consultations">
+                    <content>
+                        <VBox spacing="20.0">
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </padding>
+
+                            <!-- Section 1: Passagers d'un vol -->
+                            <VBox spacing="10.0">
+                                <children>
+                                    <Label text="Passagers d'un vol" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+
+                                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                        <children>
+                                            <Label text="Sélectionner un vol:" />
+                                            <ComboBox fx:id="consultationVolComboBox" prefWidth="300.0" />
+                                            <Button fx:id="rechercherPassagersBtn" onAction="#rechercherPassagersDuVol"
+                                                    style="-fx-background-color: #3498db; -fx-text-fill: white;"
+                                                    text="Rechercher" />
+                                        </children>
+                                    </HBox>
+
+                                    <TableView fx:id="passagersDuVolTableView" prefHeight="250.0">
+                                        <columns>
+                                            <TableColumn fx:id="passagerVolIdColumn" prefWidth="60.0" text="ID" />
+                                            <TableColumn fx:id="passagerVolNomColumn" prefWidth="150.0" text="Nom" />
+                                            <TableColumn fx:id="passagerVolPrenomColumn" prefWidth="150.0" text="Prénom" />
+                                            <TableColumn fx:id="passagerVolNationaliteColumn" prefWidth="150.0" text="Nationalité" />
+                                        </columns>
+                                    </TableView>
+                                </children>
+                            </VBox>
+
+                            <Separator />
+
+                            <!-- Section 2: Vols d'un passager -->
+                            <VBox spacing="10.0">
+                                <children>
+                                    <Label text="Vols réservés par un passager" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+
+                                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                        <children>
+                                            <Label text="Sélectionner un passager:" />
+                                            <ComboBox fx:id="consultationPassagerComboBox" prefWidth="300.0" />
+                                            <Button fx:id="rechercherVolsBtn" onAction="#rechercherVolsDuPassager"
+                                                    style="-fx-background-color: #3498db; -fx-text-fill: white;"
+                                                    text="Rechercher" />
+                                        </children>
+                                    </HBox>
+
+                                    <TableView fx:id="volsDuPassagerTableView" prefHeight="250.0">
+                                        <columns>
+                                            <TableColumn fx:id="volPassagerIdColumn" prefWidth="60.0" text="ID" />
+                                            <TableColumn fx:id="volPassagerNumeroColumn" prefWidth="120.0" text="Numéro" />
+                                            <TableColumn fx:id="volPassagerDepartColumn" prefWidth="120.0" text="Départ" />
+                                            <TableColumn fx:id="volPassagerArriveeColumn" prefWidth="120.0" text="Arrivée" />
+                                            <TableColumn fx:id="volPassagerDateDepartColumn" prefWidth="150.0" text="Date Départ" />
+                                            <TableColumn fx:id="volPassagerDateArriveeColumn" prefWidth="150.0" text="Date Arrivée" />
+                                            <TableColumn fx:id="volPassagerStatutColumn" prefWidth="100.0" text="Statut" />
+                                        </columns>
+                                    </TableView>
+                                </children>
+                            </VBox>
+                        </VBox>
+                    </content>
+                </Tab>
+
             </tabs>
         </TabPane>
 

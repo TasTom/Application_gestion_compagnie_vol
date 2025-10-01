@@ -20,6 +20,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.scene.control.Alert;
+
 
 public class VolController implements Initializable {
 
@@ -43,8 +45,8 @@ public class VolController implements Initializable {
     @FXML private TableView<Vol> volsTableView;
     @FXML private TableColumn<Vol, Integer> volIdColumn;
     @FXML private TableColumn<Vol, String> numeroVolColumn;
-    @FXML private TableColumn<Vol, String> piloteColumn;
-    @FXML private TableColumn<Vol, String> avionColumn;
+    @FXML private TableColumn<Vol, Integer> piloteColumn;
+    @FXML private TableColumn<Vol, Integer> avionColumn;
     @FXML private TableColumn<Vol, String> villeDepartColumn;
     @FXML private TableColumn<Vol, String> villeArriveeColumn;
     @FXML private TableColumn<Vol, Date> dateDepartColumn;
@@ -85,9 +87,30 @@ public class VolController implements Initializable {
     @FXML private DatePicker dateReservationPicker;
     @FXML private TableView<Reservation> reservationsTableView;
     @FXML private TableColumn<Reservation, Integer> reservationIdColumn;
-    @FXML private TableColumn<Reservation, String> reservationPassagerColumn;
-    @FXML private TableColumn<Reservation, String> reservationVolColumn;
+    @FXML private TableColumn<Reservation, Integer> reservationPassagerColumn;
+    @FXML private TableColumn<Reservation, Integer> reservationVolColumn;
     @FXML private TableColumn<Reservation, Date> reservationDateColumn;
+
+    // ===== ELEMENTS FXML - CONSULTATIONS =====
+    @FXML private ComboBox<Vol> consultationVolComboBox;
+    @FXML private ComboBox<Passager> consultationPassagerComboBox;
+    @FXML private TableView<Passager> passagersDuVolTableView;
+    @FXML private TableView<Vol> volsDuPassagerTableView;
+
+    // Colonnes pour passagers d'un vol
+    @FXML private TableColumn<Passager, Integer> passagerVolIdColumn;
+    @FXML private TableColumn<Passager, String> passagerVolNomColumn;
+    @FXML private TableColumn<Passager, String> passagerVolPrenomColumn;
+    @FXML private TableColumn<Passager, String> passagerVolNationaliteColumn;
+
+    // Colonnes pour vols d'un passager
+    @FXML private TableColumn<Vol, Integer> volPassagerIdColumn;
+    @FXML private TableColumn<Vol, String> volPassagerNumeroColumn;
+    @FXML private TableColumn<Vol, String> volPassagerDepartColumn;
+    @FXML private TableColumn<Vol, String> volPassagerArriveeColumn;
+    @FXML private TableColumn<Vol, Date> volPassagerDateDepartColumn;
+    @FXML private TableColumn<Vol, Date> volPassagerDateArriveeColumn;
+    @FXML private TableColumn<Vol, String> volPassagerStatutColumn;
 
     // ===== STATUS BAR =====
     @FXML private Label statusLabel;
@@ -119,11 +142,13 @@ public class VolController implements Initializable {
             // Configuration des ComboBox
             setupComboBoxes();
 
+            // Configuration des listeners
+            setupTableListeners();
+
             // Chargement initial des données
             rafraichirToutesLesDonnees();
 
             updateStatus("Application initialisée avec succès");
-
         } catch (Exception e) {
             updateStatus("Erreur d'initialisation: " + e.getMessage());
             e.printStackTrace();
@@ -139,6 +164,8 @@ public class VolController implements Initializable {
         dateDepartColumn.setCellValueFactory(new PropertyValueFactory<>("date_depart"));
         dateArriveeColumn.setCellValueFactory(new PropertyValueFactory<>("date_arrivee"));
         statutColumn.setCellValueFactory(new PropertyValueFactory<>("statut"));
+        piloteColumn.setCellValueFactory(new PropertyValueFactory<>("id_pilote"));
+        avionColumn.setCellValueFactory(new PropertyValueFactory<>("id_avion"));
 
         // Configuration des colonnes de la table Pilotes
         piloteIdColumn.setCellValueFactory(new PropertyValueFactory<>("id_pilote"));
@@ -163,7 +190,44 @@ public class VolController implements Initializable {
         reservationPassagerColumn.setCellValueFactory(new PropertyValueFactory<>("id_passager"));
         reservationVolColumn.setCellValueFactory(new PropertyValueFactory<>("id_vol"));
 
+        // Configuration des colonnes pour passagers d'un vol
+        passagerVolIdColumn.setCellValueFactory(new PropertyValueFactory<>("id_passager"));
+        passagerVolNomColumn.setCellValueFactory(new PropertyValueFactory<>("nom"));
+        passagerVolPrenomColumn.setCellValueFactory(new PropertyValueFactory<>("prenom"));
+        passagerVolNationaliteColumn.setCellValueFactory(new PropertyValueFactory<>("nationalite"));
+
+        // Configuration des colonnes pour vols d'un passager
+        volPassagerIdColumn.setCellValueFactory(new PropertyValueFactory<>("id_vol"));
+        volPassagerNumeroColumn.setCellValueFactory(new PropertyValueFactory<>("numero_Vol"));
+        volPassagerDepartColumn.setCellValueFactory(new PropertyValueFactory<>("ville_depart"));
+        volPassagerArriveeColumn.setCellValueFactory(new PropertyValueFactory<>("ville_arrivee"));
+        volPassagerDateDepartColumn.setCellValueFactory(new PropertyValueFactory<>("date_depart"));
+        volPassagerDateArriveeColumn.setCellValueFactory(new PropertyValueFactory<>("date_arrivee"));
+        volPassagerStatutColumn.setCellValueFactory(new PropertyValueFactory<>("statut"));
+
+        // Formater les dates dans les colonnes
+        formatDateColumn(volPassagerDateDepartColumn);
+        formatDateColumn(volPassagerDateArriveeColumn);
     }
+
+    private void formatDateColumn(TableColumn<Vol, Date> column) {
+        column.setCellFactory(col -> new TableCell<Vol, Date>() {
+            private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            @Override
+            protected void updateItem(Date item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    // Utiliser getTime() qui fonctionne pour tous les types de Date
+                    LocalDate localDate = LocalDate.ofEpochDay(item.getTime() / (1000 * 60 * 60 * 24));
+                    setText(formatter.format(localDate));
+                }
+            }
+        });
+    }
+
 
     private void setupComboBoxes() {
         // Configuration du ComboBox des statuts
@@ -180,7 +244,7 @@ public class VolController implements Initializable {
 
             @Override
             public Pilote fromString(String string) {
-                return null; // Non utilisé dans ce contexte
+                return null;
             }
         });
 
@@ -219,10 +283,63 @@ public class VolController implements Initializable {
                 return null;
             }
         });
+
+        // ComboBox pour les consultations
+        consultationVolComboBox.setConverter(new StringConverter<Vol>() {
+            @Override
+            public String toString(Vol vol) {
+                if (vol == null) return null;
+                return vol.getNumero_Vol() + " (" + vol.getVille_depart() + " → " + vol.getVille_arrivee() + ")";
+            }
+
+            @Override
+            public Vol fromString(String string) {
+                return null;
+            }
+        });
+
+        consultationPassagerComboBox.setConverter(new StringConverter<Passager>() {
+            @Override
+            public String toString(Passager passager) {
+                if (passager == null) return null;
+                return passager.getPrenom() + " " + passager.getNom() + " (" + passager.getNationalite() + ")";
+            }
+
+            @Override
+            public Passager fromString(String string) {
+                return null;
+            }
+        });
+    }
+
+    private void setupTableListeners() {
+        // Listeners pour remplir automatiquement les formulaires lors de la sélection
+        volsTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                remplirFormVol(newSelection);
+            }
+        });
+
+        pilotesTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                remplirFormPilote(newSelection);
+            }
+        });
+
+        avionsTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                remplirFormAvion(newSelection);
+            }
+        });
+
+        passagersTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                remplirFormPassager(newSelection);
+            }
+        });
     }
 
     // ===== MÉTHODES POUR LES VOLS =====
-
     @FXML
     private void creerVol() {
         try {
@@ -254,7 +371,6 @@ public class VolController implements Initializable {
             rafraichirVols();
             viderFormVol();
             updateStatus("Vol créé avec succès");
-
         } catch (SQLException e) {
             updateStatus("Erreur lors de la création du vol: " + e.getMessage());
             e.printStackTrace();
@@ -280,6 +396,7 @@ public class VolController implements Initializable {
             if (dateDepartPicker.getValue() != null) {
                 volSelectionne.setDate_depart(Date.from(dateDepartPicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
             }
+
             if (dateArriveePicker.getValue() != null) {
                 volSelectionne.setDate_arrivee(Date.from(dateArriveePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
             }
@@ -288,7 +405,6 @@ public class VolController implements Initializable {
             rafraichirVols();
             viderFormVol();
             updateStatus("Vol modifié avec succès");
-
         } catch (SQLException e) {
             updateStatus("Erreur lors de la modification du vol: " + e.getMessage());
             e.printStackTrace();
@@ -308,7 +424,6 @@ public class VolController implements Initializable {
             rafraichirVols();
             viderFormVol();
             updateStatus("Vol supprimé avec succès");
-
         } catch (SQLException e) {
             updateStatus("Erreur lors de la suppression du vol: " + e.getMessage());
             e.printStackTrace();
@@ -318,53 +433,24 @@ public class VolController implements Initializable {
     @FXML
     private void rafraichirVols() {
         try {
-            System.out.println("=== DEBUT RAFRAICHIR VOLS ===");
-
-            // Test connexion
-            if (connection == null || connection.isClosed()) {
-                System.err.println("ERREUR: Connexion base de données fermée !");
-                updateStatus("Connexion base de données fermée");
-                return;
-            }
-
             List<Vol> vols = volDAO.readAll();
-            System.out.println("Nombre de vols trouvés: " + vols.size());
-
-            // Debug premiers résultats
-            for (int i = 0; i < Math.min(3, vols.size()); i++) {
-                Vol v = vols.get(i);
-                System.out.println("Vol " + (i+1) + ": " + v.getNumero_Vol() +
-                        " | Départ: " + v.getVille_depart() +
-                        " | Arrivée: " + v.getVille_arrivee());
-            }
-
             volsData.setAll(vols);
             volsTableView.setItems(volsData);
+            consultationVolComboBox.setItems(FXCollections.observableArrayList(vols));
             updateStatus("Vols rafraîchis: " + vols.size() + " trouvés");
-
-            System.out.println("=== FIN RAFRAICHIR VOLS ===");
-
         } catch (SQLException e) {
-            System.err.println("Erreur SQL: " + e.getMessage());
             updateStatus("Erreur SQL: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
-            System.err.println("Erreur générale: " + e.getMessage());
-            updateStatus("Erreur: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-
     // ===== MÉTHODES POUR LES PILOTES =====
-
     @FXML
     private void ajouterPilote() {
         try {
             String nom = piloteNomField.getText();
             String prenom = pilotePrenomField.getText();
             String experienceText = piloteExperienceField.getText();
-            int id_pilote = Integer.parseInt(piloteIdColumn.getText());
 
             if (nom.isEmpty() || prenom.isEmpty() || experienceText.isEmpty()) {
                 updateStatus("Veuillez remplir tous les champs du pilote");
@@ -372,13 +458,11 @@ public class VolController implements Initializable {
             }
 
             int experience = Integer.parseInt(experienceText);
-            Pilote nouveauPilote = new Pilote(id_pilote,nom, prenom, experience);
-
+            Pilote nouveauPilote = new Pilote(0, nom, prenom, experience);
             piloteDAO.create(nouveauPilote);
             rafraichirPilotes();
             viderFormPilote();
             updateStatus("Pilote ajouté avec succès");
-
         } catch (NumberFormatException e) {
             updateStatus("Veuillez entrer un nombre valide pour l'expérience");
         } catch (Exception e) {
@@ -399,12 +483,10 @@ public class VolController implements Initializable {
             piloteSelectionne.setNom(piloteNomField.getText());
             piloteSelectionne.setPrenom(pilotePrenomField.getText());
             piloteSelectionne.setExperience(Integer.parseInt(piloteExperienceField.getText()));
-
             piloteDAO.update(piloteSelectionne);
             rafraichirPilotes();
             viderFormPilote();
             updateStatus("Pilote modifié avec succès");
-
         } catch (Exception e) {
             updateStatus("Erreur lors de la modification du pilote: " + e.getMessage());
             e.printStackTrace();
@@ -424,7 +506,6 @@ public class VolController implements Initializable {
             rafraichirPilotes();
             viderFormPilote();
             updateStatus("Pilote supprimé avec succès");
-
         } catch (Exception e) {
             updateStatus("Erreur lors de la suppression du pilote: " + e.getMessage());
             e.printStackTrace();
@@ -439,7 +520,6 @@ public class VolController implements Initializable {
             pilotesTableView.setItems(pilotesData);
             piloteComboBox.setItems(pilotesData);
             updateStatus("Liste des pilotes rafraîchie");
-
         } catch (Exception e) {
             updateStatus("Erreur lors du rafraîchissement des pilotes: " + e.getMessage());
             e.printStackTrace();
@@ -447,7 +527,6 @@ public class VolController implements Initializable {
     }
 
     // ===== MÉTHODES POUR LES AVIONS =====
-
     @FXML
     private void ajouterAvion() {
         try {
@@ -460,13 +539,11 @@ public class VolController implements Initializable {
             }
 
             int capacite = Integer.parseInt(capaciteText);
-            Avion nouvelAvion = new Avion(modele, capacite);
-
+            Avion nouvelAvion = new Avion(0, modele, capacite);
             avionDAO.create(nouvelAvion);
             rafraichirAvions();
             viderFormAvion();
             updateStatus("Avion ajouté avec succès");
-
         } catch (NumberFormatException e) {
             updateStatus("Veuillez entrer un nombre valide pour la capacité");
         } catch (SQLException e) {
@@ -486,12 +563,10 @@ public class VolController implements Initializable {
         try {
             avionSelectionne.setModele(avionModeleField.getText());
             avionSelectionne.setCapacite(Integer.parseInt(avionCapaciteField.getText()));
-
             avionDAO.update(avionSelectionne);
             rafraichirAvions();
             viderFormAvion();
             updateStatus("Avion modifié avec succès");
-
         } catch (SQLException e) {
             updateStatus("Erreur lors de la modification de l'avion: " + e.getMessage());
             e.printStackTrace();
@@ -511,7 +586,6 @@ public class VolController implements Initializable {
             rafraichirAvions();
             viderFormAvion();
             updateStatus("Avion supprimé avec succès");
-
         } catch (SQLException e) {
             updateStatus("Erreur lors de la suppression de l'avion: " + e.getMessage());
             e.printStackTrace();
@@ -526,7 +600,6 @@ public class VolController implements Initializable {
             avionsTableView.setItems(avionsData);
             avionComboBox.setItems(avionsData);
             updateStatus("Liste des avions rafraîchie");
-
         } catch (SQLException e) {
             updateStatus("Erreur lors du rafraîchissement des avions: " + e.getMessage());
             e.printStackTrace();
@@ -534,7 +607,6 @@ public class VolController implements Initializable {
     }
 
     // ===== MÉTHODES POUR LES PASSAGERS =====
-
     @FXML
     private void ajouterPassager() {
         try {
@@ -548,12 +620,10 @@ public class VolController implements Initializable {
             }
 
             Passager nouveauPassager = new Passager(0, prenom, nom, nationalite);
-
             passagerDAO.create(nouveauPassager);
             rafraichirPassagers();
             viderFormPassager();
             updateStatus("Passager ajouté avec succès");
-
         } catch (SQLException e) {
             updateStatus("Erreur lors de l'ajout du passager: " + e.getMessage());
             e.printStackTrace();
@@ -572,12 +642,10 @@ public class VolController implements Initializable {
             passagerSelectionne.setNom(passagerNomField.getText());
             passagerSelectionne.setPrenom(passagerPrenomField.getText());
             passagerSelectionne.setNationalite(passagerNationaliteField.getText());
-
             passagerDAO.update(passagerSelectionne);
             rafraichirPassagers();
             viderFormPassager();
             updateStatus("Passager modifié avec succès");
-
         } catch (SQLException e) {
             updateStatus("Erreur lors de la modification du passager: " + e.getMessage());
             e.printStackTrace();
@@ -597,7 +665,6 @@ public class VolController implements Initializable {
             rafraichirPassagers();
             viderFormPassager();
             updateStatus("Passager supprimé avec succès");
-
         } catch (SQLException e) {
             updateStatus("Erreur lors de la suppression du passager: " + e.getMessage());
             e.printStackTrace();
@@ -611,8 +678,8 @@ public class VolController implements Initializable {
             passagersData.setAll(passagers);
             passagersTableView.setItems(passagersData);
             reservationPassagerComboBox.setItems(passagersData);
+            consultationPassagerComboBox.setItems(FXCollections.observableArrayList(passagers));
             updateStatus("Liste des passagers rafraîchie");
-
         } catch (SQLException e) {
             updateStatus("Erreur lors du rafraîchissement des passagers: " + e.getMessage());
             e.printStackTrace();
@@ -620,7 +687,6 @@ public class VolController implements Initializable {
     }
 
     // ===== MÉTHODES POUR LES RÉSERVATIONS =====
-
     @FXML
     private void creerReservation() {
         try {
@@ -633,21 +699,48 @@ public class VolController implements Initializable {
                 return;
             }
 
-            Date dateReservationDate = Date.from(dateReservation.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            // Vérifier la capacité avant de créer la réservation
+            int nbReservations = reservationDAO.countReservationsByVol(volSelectionne.getId_vol());
+            int capaciteVol = volDAO.getCapaciteVol(volSelectionne.getId_vol());
 
+            if (nbReservations >= capaciteVol) {
+                // Afficher une alerte à l'utilisateur
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Capacité dépassée");
+                alert.setHeaderText("Impossible de créer la réservation");
+                alert.setContentText("Le vol " + volSelectionne.getNumero_Vol() +
+                        " a atteint sa capacité maximale.\n" +
+                        "Capacité: " + capaciteVol + "\n" +
+                        "Réservations actuelles: " + nbReservations);
+                alert.showAndWait();
+                updateStatus("Réservation refusée : capacité maximale atteinte");
+                return;
+            }
+
+            Date dateReservationDate = Date.from(dateReservation.atStartOfDay(ZoneId.systemDefault()).toInstant());
             Reservation nouvelleReservation = new Reservation(0, passagerSelectionne.getId_passager(),
                     volSelectionne.getId_vol(), dateReservationDate);
 
             reservationDAO.create(nouvelleReservation);
             rafraichirReservations();
             viderFormReservation();
-            updateStatus("Réservation créée avec succès");
+            updateStatus("Réservation créée avec succès (" + (nbReservations + 1) + "/" + capaciteVol + " places)");
 
         } catch (SQLException e) {
-            updateStatus("Erreur lors de la création de la réservation: " + e.getMessage());
+            if (e.getMessage().contains("Capacité maximale")) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Erreur de capacité");
+                alert.setHeaderText("Réservation impossible");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+                updateStatus("Erreur: " + e.getMessage());
+            } else {
+                updateStatus("Erreur lors de la création de la réservation: " + e.getMessage());
+            }
             e.printStackTrace();
         }
     }
+
 
     @FXML
     private void supprimerReservation() {
@@ -661,7 +754,6 @@ public class VolController implements Initializable {
             reservationDAO.delete(reservationSelectionnee.getId_reservation());
             rafraichirReservations();
             updateStatus("Réservation supprimée avec succès");
-
         } catch (SQLException e) {
             updateStatus("Erreur lors de la suppression de la réservation: " + e.getMessage());
             e.printStackTrace();
@@ -676,15 +768,52 @@ public class VolController implements Initializable {
             reservationsTableView.setItems(reservationsData);
             reservationVolComboBox.setItems(volsData);
             updateStatus("Liste des réservations rafraîchie");
-
         } catch (SQLException e) {
             updateStatus("Erreur lors du rafraîchissement des réservations: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    // ===== MÉTHODES UTILITAIRES =====
+    // ===== MÉTHODES POUR LES CONSULTATIONS =====
+    @FXML
+    private void rechercherPassagersDuVol() {
+        Vol volSelectionne = consultationVolComboBox.getValue();
 
+        if (volSelectionne == null) {
+            updateStatus("Veuillez sélectionner un vol");
+            return;
+        }
+
+        try {
+            List<Passager> passagers = passagerDAO.findPassagersByVol(volSelectionne.getId_vol());
+            passagersDuVolTableView.setItems(FXCollections.observableArrayList(passagers));
+            updateStatus(passagers.size() + " passager(s) trouvé(s) pour le vol " + volSelectionne.getNumero_Vol());
+        } catch (Exception e) {
+            updateStatus("Erreur lors de la recherche: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void rechercherVolsDuPassager() {
+        Passager passagerSelectionne = consultationPassagerComboBox.getValue();
+
+        if (passagerSelectionne == null) {
+            updateStatus("Veuillez sélectionner un passager");
+            return;
+        }
+
+        try {
+            List<Vol> vols = volDAO.findVolsByPassager(passagerSelectionne.getId_passager());
+            volsDuPassagerTableView.setItems(FXCollections.observableArrayList(vols));
+            updateStatus(vols.size() + " vol(s) trouvé(s) pour " + passagerSelectionne.getPrenom() + " " + passagerSelectionne.getNom());
+        } catch (Exception e) {
+            updateStatus("Erreur lors de la recherche: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // ===== MÉTHODES UTILITAIRES =====
     private void rafraichirToutesLesDonnees() {
         rafraichirPilotes();
         rafraichirAvions();
@@ -732,35 +861,6 @@ public class VolController implements Initializable {
         System.out.println("Status: " + message);
     }
 
-    // Méthode pour remplir les champs lors de la sélection d'un élément dans les tables
-    @FXML
-    private void initialize() {
-        // Listeners pour remplir automatiquement les formulaires lors de la sélection
-        volsTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                remplirFormVol(newSelection);
-            }
-        });
-
-        pilotesTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                remplirFormPilote(newSelection);
-            }
-        });
-
-        avionsTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                remplirFormAvion(newSelection);
-            }
-        });
-
-        passagersTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                remplirFormPassager(newSelection);
-            }
-        });
-    }
-
     private void remplirFormVol(Vol vol) {
         numeroVolField.setText(vol.getNumero_Vol());
         villeDepartField.setText(vol.getVille_depart());
@@ -771,6 +871,7 @@ public class VolController implements Initializable {
         if (vol.getDate_depart() != null) {
             dateDepartPicker.setValue(vol.getDate_depart().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         }
+
         if (vol.getDate_arrivee() != null) {
             dateArriveePicker.setValue(vol.getDate_arrivee().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         }
