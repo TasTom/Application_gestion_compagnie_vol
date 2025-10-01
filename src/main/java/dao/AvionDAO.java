@@ -51,10 +51,9 @@ public class AvionDAO {
         PreparedStatement pst = connection.prepareStatement(req);
         pst.setInt(1, id_avion);
         ResultSet rs = pst.executeQuery();
-
         Avion avion = null;
         if (rs.next()) {
-            avion = new Avion(rs.getString("modele"), rs.getInt("capacite"));
+            avion = new Avion(rs.getInt("id_avion"), rs.getString("modele"), rs.getInt("capacite"));
         }
         rs.close();
         pst.close();
@@ -67,9 +66,8 @@ public class AvionDAO {
         String req = "SELECT * FROM avion";
         PreparedStatement pst = connection.prepareStatement(req);
         ResultSet rs = pst.executeQuery();
-
         while (rs.next()) {
-            Avion avion = new Avion(rs.getString("modele"), rs.getInt("capacite"));
+            Avion avion = new Avion(rs.getInt("id_avion"), rs.getString("modele"), rs.getInt("capacite"));
             avions.add(avion);
         }
         rs.close();

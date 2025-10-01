@@ -5,12 +5,11 @@ public class Avion {
     private String modele;
     private final int id_avion;
     private int capacite;
-    private static int compteur = 0;
 
-    public Avion(String modele, int capacite) {
+    public Avion(int id_avion, String modele, int capacite) {
+        this.id_avion = id_avion;
         this.modele = modele;
         this.capacite = capacite;
-        this.id_avion = compteur++;
     }
 
     public String getModele() {
@@ -37,7 +36,4 @@ public class Avion {
     public String toString() {
         return "Avion [modele=" + modele + ", id_avion=" + id_avion + ", capacite=" + capacite + "]";
     }
-
-
-
 }

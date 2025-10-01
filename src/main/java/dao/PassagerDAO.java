@@ -88,4 +88,32 @@ public class PassagerDAO {
         statement.close();
         return passagers;
     }
+
+    // Recherche par nom
+    public List<Passager> findPassagersByVol(int id_vol) {
+        List<Passager> passagers = new ArrayList<>();
+        String sql = "SELECT p.* FROM passager p " +
+                "INNER JOIN reservation r ON p.id_passager = r.id_passager " +
+                "WHERE r.id_vol = ?";
+        try {
+            java.sql.PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id_vol);
+            java.sql.ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                Passager passager = new Passager(
+                        rs.getInt("id_passager"),
+                        rs.getString("prenom"),
+                        rs.getString("nom"),
+                        rs.getString("nationalite")
+                );
+                passagers.add(passager);
+            }
+            rs.close();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return passagers;
+    }
+
 }

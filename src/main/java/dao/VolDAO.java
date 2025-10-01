@@ -109,4 +109,59 @@ public class VolDAO {
         statement.close();
         return vols;
     }
+
+    // Recherche des vols par avion
+    public List<Vol> findVolsByPassager(int id_passager) {
+        List<Vol> vols = new ArrayList<>();
+        String sql = "SELECT v.* FROM vol v " +
+                "INNER JOIN reservation r ON v.id_vol = r.id_vol " +
+                "WHERE r.id_passager = ?";
+        try {
+            java.sql.PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id_passager);
+            java.sql.ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                Vol vol = new Vol(
+                        rs.getInt("id_vol"),
+                        rs.getString("numero_Vol"),
+                        rs.getInt("id_avion"),
+                        rs.getInt("id_pilote"),
+                        rs.getString("ville_depart"),
+                        rs.getString("ville_arrivee"),
+                        rs.getDate("date_depart"),
+                        rs.getDate("date_arrivee"),
+                        rs.getString("statut")
+                );
+                vols.add(vol);
+            }
+            rs.close();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return vols;
+    }
+
+    // Obtenir la capacité disponible pour un vol
+    public int getCapaciteVol(int id_vol) throws SQLException {
+        String sql = "SELECT a.capacite FROM avion a " +
+                "INNER JOIN vol v ON a.id_avion = v.id_avion " +
+                "WHERE v.id_vol = ?";
+        int capacite = 0;
+        try {
+            java.sql.PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id_vol);
+            java.sql.ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                capacite = rs.getInt("capacite");
+            }
+            rs.close();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return capacite;
+    }
+
+
 }

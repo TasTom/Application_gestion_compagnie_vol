@@ -18,14 +18,45 @@ public class ReservationDAO {
 
     // Création d'une réservation dans la BDD
     public void create(Reservation reservation) throws SQLException {
-        String sql = "INSERT INTO reservation (id_passager, id_vol, date_reservation) VALUES (?, ?, ?)";
-        PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setInt(1, reservation.getId_passager());
-        statement.setInt(2, reservation.getId_vol());
-        statement.setTimestamp(3, new Timestamp(reservation.getDate_Reservation().getTime()));
-        statement.executeUpdate();
-        statement.close();
+        // Vérifier d'abord la capacité
+        int nbReservations = countReservationsByVol(reservation.getId_vol());
+
+        // Récupérer la capacité de l'avion pour ce vol
+        String sqlCapacite = "SELECT a.capacite FROM avion a " +
+                "INNER JOIN vol v ON a.id_avion = v.id_avion " +
+                "WHERE v.id_vol = ?";
+
+        int capacite = 0;
+        java.sql.PreparedStatement stmtCapacite = connection.prepareStatement(sqlCapacite);
+        stmtCapacite.setInt(1, reservation.getId_vol());
+        java.sql.ResultSet rsCapacite = stmtCapacite.executeQuery();
+
+        if (rsCapacite.next()) {
+            capacite = rsCapacite.getInt("capacite");
+        }
+        rsCapacite.close();
+        stmtCapacite.close();
+
+        // Vérifier si la capacité est dépassée
+        if (nbReservations >= capacite) {
+            throw new SQLException("Capacité maximale atteinte pour ce vol. " +
+                    "Capacité: " + capacite + ", Réservations: " + nbReservations);
+        }
+
+        // Si la capacité n'est pas dépassée, créer la réservation
+        String sql = "INSERT INTO reservation (id_passager, id_vol, date_Reservation) VALUES (?, ?, ?)";
+        try {
+            java.sql.PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, reservation.getId_passager());
+            statement.setInt(2, reservation.getId_vol());
+            statement.setDate(3, new java.sql.Date(reservation.getDate_Reservation().getTime()));
+            statement.executeUpdate();
+            statement.close();
+        } catch (SQLException e) {
+            throw e;
+        }
     }
+
 
     // Mise à jour d'une réservation
     public void update(Reservation reservation) throws SQLException {
@@ -111,4 +142,24 @@ public class ReservationDAO {
         statement.close();
         return reservations;
     }
+
+    // Compter le nombre de réservations pour un vol
+    public int countReservationsByVol(int id_vol) throws SQLException {
+        String sql = "SELECT COUNT(*) as total FROM reservation WHERE id_vol = ?";
+        int count = 0;
+        try {
+            java.sql.PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id_vol);
+            java.sql.ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("total");
+            }
+            rs.close();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
 }

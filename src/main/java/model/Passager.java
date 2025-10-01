@@ -1,14 +1,14 @@
 package model;
 
 public class Passager {
-    private static int compteur = 0;
+
     private final int id_passager;
     private String prenom;
     private String nom;
     private String nationalite;
 
     public Passager(int id_passager, String prenom, String nom, String nationalite) {
-        this.id_passager = compteur++;
+        this.id_passager = id_passager;
         this.prenom = prenom;
         this.nom = nom;
         this.nationalite = nationalite;
